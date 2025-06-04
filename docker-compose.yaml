@@ -27,6 +27,25 @@ services:
         aliases:
           - ${MYSQL_HOST_ALIAS}
 
+  postgres:
+    image: postgres:${POSTGRES_VERSION}
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_DB_PASS}
+      LANG: ${POSTGRES_LANG}
+      POSTGRES_INITDB_ARGS: "--encoding=${POSTGRES_ENCODING} --lc-collate=${POSTGRES_COLLATION} --lc-ctype=${POSTGRES_CTYPE}"
+    volumes:
+      - ./db_init_postgres:/docker-entrypoint-initdb.d
+      - ./local_dir/postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    networks:
+      backend:
+        aliases:
+          - ${POSTGRES_HOST_ALIAS}
+
 networks:
   backend:
     external: true
