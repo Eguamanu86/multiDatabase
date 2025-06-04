@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:${MYSQL_VERSION}
+    container_name: mysql
+    cap_add:
+      - sys_nice
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASS}
+      MYSQL_DATABASE: ${MYSQL_DB_NAME}
+      MYSQL_USER: ${MYSQL_DB_USER}
+      MYSQL_PASSWORD: ${MYSQL_DB_PASS}
+      LANG: ${MYSQL_LANG}
+    command:
+      - mysqld
+      - --character-set-server=${MYSQL_CHARACTER_SET}
+      - --collation-server=${MYSQL_COLLATION}
+      - --init-connect=SET NAMES ${MYSQL_CHARACTER_SET} COLLATE ${MYSQL_COLLATION};
+    volumes:
+      - ./db_init_mysql:/docker-entrypoint-initdb.d
+      - ./local_dir/mysql_data:/var/lib/mysql
+    ports:
+      - "${MYSQL_PORT}:3306"
+    networks:
+      backend:
+        aliases:
+          - ${MYSQL_HOST_ALIAS}
+
+networks:
+  backend:
+    external: true
+    name: ${DOCKER_EXTERNAL_NETWORK_NAME}

@@ -1,0 +1,27 @@
+# Ignorar directorios de datos persistentes de bases de datos
+/local_dir/
+/local_dir/*
+!/local_dir/.gitkeep
+
+# Ignorar archivos de inicialización de bases de datos
+/db_init_mysql/
+/db_init_postgres/
+/db_init_sqlserver/
+
+# Ignorar archivos de entorno
+.env
+
+# Otros archivos o carpetas típicos a ignorar
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+**/.docker
