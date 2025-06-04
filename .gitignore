@@ -6,6 +6,7 @@
 # Ignorar archivos de inicialización de bases de datos
 /db_init_mysql/
 /db_init_postgres/
+!db_init_postgres/pg_hba.conf
 /db_init_sqlserver/
 
 # Ignorar archivos de entorno
