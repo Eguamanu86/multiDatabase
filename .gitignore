@@ -1,21 +1,12 @@
-# Ignorar todo el contenido de las carpetas, pero permitir la carpeta y .gitkeep
-
+# Ignorar directorios de datos persistentes de bases de datos
+/local_dir/
 /local_dir/*
-!/local_dir/
 !/local_dir/.gitkeep
 
-/db_init_mysql/*
-!/db_init_mysql/
-!/db_init_mysql/.gitkeep
-
-/db_init_postgres/*
-!/db_init_postgres/
-!/db_init_postgres/.gitkeep
-!db_init_postgres/pg_hba.conf
-
-/db_init_sqlserver/*
-!/db_init_sqlserver/
-!/db_init_sqlserver/.gitkeep
+# Ignorar archivos de inicialización de bases de datos
+/db_init_mysql/
+/db_init_postgres/
+/db_init_sqlserver/
 
 # Ignorar archivos de entorno
 .env

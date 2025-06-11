@@ -7,6 +7,8 @@ services:
     cap_add:
       - sys_nice
     environment:
+      WWWUSER: '${WWWUSER}'
+      WWWGROUP: '${WWWGROUP}'
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASS}
       MYSQL_DATABASE: ${MYSQL_DB_NAME}
       MYSQL_USER: ${MYSQL_DB_USER}
@@ -21,7 +23,7 @@ services:
       - ./db_init_mysql:/docker-entrypoint-initdb.d
       - ./local_dir/mysql_data:/var/lib/mysql
     ports:
-      - "${MYSQL_PORT}:3306"
+      - "0.0.0.0:${MYSQL_PORT}:3306"
     networks:
       backend:
         aliases:
@@ -31,39 +33,68 @@ services:
     image: postgres:${POSTGRES_VERSION}
     container_name: postgres
     environment:
+      WWWUSER: '${WWWUSER}'
+      WWWGROUP: '${WWWGROUP}'
       POSTGRES_DB: ${POSTGRES_DB_NAME}
       POSTGRES_USER: ${POSTGRES_DB_USER}
       POSTGRES_PASSWORD: ${POSTGRES_DB_PASS}
       LANG: ${POSTGRES_LANG}
       POSTGRES_INITDB_ARGS: "--encoding=${POSTGRES_ENCODING} --lc-collate=${POSTGRES_COLLATION} --lc-ctype=${POSTGRES_CTYPE}"
-    volumes:
-    - ./db_init_postgres:/docker-entrypoint-initdb.d
-    - ./local_dir/postgres_data:/var/lib/postgresql/data
-    - ./db_init_postgres/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "0.0.0.0:${POSTGRES_PORT}:5432"
+    volumes:
+      - ./db_init_postgres:/docker-entrypoint-initdb.d
+      - ./local_dir/postgres_data:/var/lib/postgresql/data
+    restart: always
     networks:
       backend:
         aliases:
           - ${POSTGRES_HOST_ALIAS}
 
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:${MSSQL_VERSION}
-    container_name: sqlserver
-    environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: ${MSSQL_SA_PASSWORD}
-      MSSQL_PID: "Express"
-      LANG: ${MSSQL_LANG}
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    env_file: .env
     volumes:
-      - ./db_init_sqlserver:/docker-entrypoint-initdb.d
-      - ./local_dir/sqlserver_data:/var/opt/mssql
+      - pgadmin:/root/.pgadmin
     ports:
-      - "${MSSQL_PORT}:1433"
+      - "0.0.0.0:${PGADMIN_PORT}:80"
+    depends_on:
+      - "postgres"
+    restart: unless-stopped
     networks:
       backend:
         aliases:
-          - ${MSSQL_HOST_ALIAS}
+          - ${PGADMIN_HOST_ALIAS}
+
+  #sqlserver:
+  #  image: mcr.microsoft.com/mssql/server:2019-CU16-ubuntu-20.04
+  #  container_name: sqlserver
+  #  user: "10001:0"  # Fuerza ejecución como usuario mssql
+  #  environment:
+  #    ACCEPT_EULA: "Y"
+  #    SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
+  #    MSSQL_PID: "Express"
+  #    MSSQL_LCID: "1033"
+  #    MSSQL_COLLATION: "SQL_Latin1_General_CP1_CI_AS"
+  #  volumes:
+  #    - ./local_dir/sqlserver_data:/var/opt/mssql:z  # ":z" para SELinux
+  #  ports:
+  #    - "0.0.0.0:${MSSQL_PORT}:1433"
+  #  restart: unless-stopped
+  #  deploy:
+  #    resources:
+  #      limits:
+  #        memory: 4G
+  #  networks:
+  #    backend:
+  #      aliases:
+  #        - ${MSSQL_HOST_ALIAS}
+
+volumes:
+  pg-data:
+    driver: local
+  pgadmin:
 
 networks:
   backend:
